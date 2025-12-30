@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>행복네컷 (V3.23)</title>
+  <title>행복네컷 (V3.31)</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- ✅ 예쁜 글꼴 10개(설치 없이 사용) -->
-  <!-- 1) Jua 2) Noto Sans KR 3) Nanum Gothic 4) Nanum Pen Script
-       5) Gaegu 6) Poor Story 7) Dongle 8) Hi Melody 9) Do Hyeon 10) Gowun Dodum -->
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&family=Nanum+Pen+Script&family=Nanum+Gothic:wght@400;700&family=Gaegu:wght@400;700&family=Poor+Story&family=Dongle:wght@300;400;700&family=Hi+Melody&family=Do+Hyeon&family=Gowun+Dodum&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -66,7 +64,7 @@
     <header class="bg-white p-3 shadow-sm flex justify-center items-center z-10 shrink-0 h-14 border-b">
       <div class="flex items-center gap-2">
         <i data-lucide="camera" class="text-pink-500 w-6 h-6"></i>
-        <h1 class="text-xl font-jua text-pink-600">행복네컷 <span class="text-xs text-gray-400 font-normal">V3.23</span></h1>
+        <h1 class="text-xl font-jua text-pink-600">행복네컷 <span class="text-xs text-gray-400 font-normal">V3.31</span></h1>
       </div>
     </header>
 
@@ -86,22 +84,34 @@
               </p>
             </div>
 
-            <div class="grid grid-cols-4 gap-4 w-full pt-6 border-t border-pink-50">
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center text-pink-500 mb-1"><i data-lucide="aperture" class="w-5 h-5"></i></div>
-                <span class="text-[10px] font-jua text-gray-500">촬영</span>
+            <!-- ✅ V3.31: 아이콘/글자 정렬 + 크기 확대 -->
+            <div class="grid grid-cols-4 gap-5 w-full pt-6 border-t border-pink-50">
+              <div class="flex flex-col items-center justify-start gap-2">
+                <div class="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-500 shadow-sm">
+                  <i data-lucide="aperture" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[12px] font-jua text-gray-600 leading-none">촬영</span>
               </div>
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 mb-1"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-                <span class="text-[10px] font-jua text-gray-500">선택</span>
+
+              <div class="flex flex-col items-center justify-start gap-2">
+                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-sm">
+                  <i data-lucide="check-square" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[12px] font-jua text-gray-600 leading-none">선택</span>
               </div>
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-500 mb-1"><i data-lucide="palette" class="w-5 h-5"></i></div>
-                <span class="text-[10px] font-jua text-gray-500">프레임</span>
+
+              <div class="flex flex-col items-center justify-start gap-2">
+                <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-500 shadow-sm">
+                  <i data-lucide="palette" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[12px] font-jua text-gray-600 leading-none">프레임</span>
               </div>
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-500 mb-1"><i data-lucide="smile" class="w-5 h-5"></i></div>
-                <span class="text-[10px] font-jua text-gray-500">꾸미기</span>
+
+              <div class="flex flex-col items-center justify-start gap-2">
+                <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-500 shadow-sm">
+                  <i data-lucide="smile" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[12px] font-jua text-gray-600 leading-none">꾸미기</span>
               </div>
             </div>
           </div>
@@ -134,9 +144,23 @@
       <section id="step-camera" class="hidden flex flex-col items-center w-full h-full p-4">
         <div id="camera-container" class="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden shadow-xl mb-6 flex items-center justify-center border-4 border-white">
           <video id="video-feed" autoplay playsinline class="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]"></video>
+
           <div id="countdown-overlay" class="absolute inset-0 flex items-center justify-center bg-black/30 hidden z-20">
-            <span id="countdown-text" class="text-8xl font-bold text-white font-jua">3</span>
+            <span id="countdown-text" class="text-8xl font-bold text-white font-jua">Ready!</span>
           </div>
+
+          <!-- ✅ 준비완료 버튼: 반드시 클릭해야 촬영 시작 (자동 시작 제거) -->
+          <button
+            id="btn-ready"
+            onclick="startReadyCountdown()"
+            class="absolute inset-0 m-auto w-[220px] h-[80px]
+                   bg-pink-500 text-white font-jua text-2xl
+                   rounded-[2rem] shadow-xl
+                   flex items-center justify-center
+                   active:scale-95 transition z-30 hidden">
+            준비 완료!
+          </button>
+
           <div class="absolute top-4 right-4 bg-black/50 text-white px-4 py-2 rounded-full font-mono text-xl z-10">
             <span id="shot-count">0</span> / 6
           </div>
@@ -224,7 +248,6 @@
                 class="w-full p-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 font-gothic text-sm resize-none"></textarea>
 
               <div class="flex gap-2">
-                <!-- ✅ (요청 3) 예쁜 글꼴 10개 -->
                 <select id="font-selector" class="font-selector flex-1 bg-gray-50">
                   <option value="Jua" selected>주아체</option>
                   <option value="Gowun Dodum">고운돋움</option>
@@ -304,7 +327,7 @@
   // =========================================================
   // ✅ Version control
   // =========================================================
-  const APP_VERSION = "V3.23";
+  const APP_VERSION = "V3.31";
 
   // =========================================================
   // ✅ Handle sizes
@@ -314,34 +337,24 @@
   const HANDLE_OFFSET   = 34;
 
   // =========================================================
-  // ✅ (요청 1) "사진 4칸 배치"를 한 곳에서 고정 관리 (모든 단계 동일)
+  // ✅ Layout
   // =========================================================
   const FRAME_LAYOUT = {
     canvasW: 600,
     canvasH: 1800,
-
-    marginX: 90,      // 좌우 여백
-    titleY: 60,       // 타이틀 시작
-    startY: 180,      // 첫 사진 시작 Y
-    gapY: 30,         // 사진 간격
-
-    // 사진 영역 높이 비율(기존 값 유지) — 단계마다 달라지지 않게 고정
+    marginX: 90,
+    titleY: 60,
+    startY: 180,
+    gapY: 30,
     photoAspectH: 0.72,
-
-    dateBottomPadding: 60,  // 날짜 baseline 위치(아래에서)
-    dateTextTopGap: 40      // 4번째 사진과 날짜 사이 "여백" 확보용
+    dateBottomPadding: 60,
+    dateTextTopGap: 40
   };
 
   function pad2(n){ return String(n).padStart(2,'0'); }
   function makeTimeStamp(){
     const d = new Date();
-    const y = d.getFullYear();
-    const m = pad2(d.getMonth()+1);
-    const day = pad2(d.getDate());
-    const hh = pad2(d.getHours());
-    const mm = pad2(d.getMinutes());
-    const ss = pad2(d.getSeconds());
-    return `${y}${m}${day}_${hh}${mm}${ss}`;
+    return `${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
   }
 
   const makeId = () => {
@@ -368,7 +381,6 @@
     return (dx*dx + dy*dy) <= (HANDLE_HIT_R * HANDLE_HIT_R);
   }
 
-  // object-fit: cover
   function drawImageCover(ctx, img, dx, dy, dWidth, dHeight) {
     const sWidth = img.naturalWidth || img.width;
     const sHeight = img.naturalHeight || img.height;
@@ -406,16 +418,15 @@
     }
   }
 
-  // ✅ (요청 2) 문구 기본 위치 계산: 4번째 사진과 날짜 사이 여백의 중앙
   function getDefaultTextPosition(){
     const { canvasW, canvasH, marginX, startY, gapY, photoAspectH, dateBottomPadding, dateTextTopGap } = FRAME_LAYOUT;
     const imgW = canvasW - (marginX * 2);
     const imgH = imgW * photoAspectH;
 
-    const lastPhotoBottom = startY + 3*(imgH + gapY) + imgH;              // 4번째 사진 바닥
-    const dateBaselineY   = canvasH - dateBottomPadding;                   // 날짜 baseline
-    const textZoneTop     = lastPhotoBottom + dateTextTopGap;              // 여백 시작
-    const textZoneBottom  = dateBaselineY - 20;                            // 날짜 위쪽 약간 여유
+    const lastPhotoBottom = startY + 3*(imgH + gapY) + imgH;
+    const dateBaselineY   = canvasH - dateBottomPadding;
+    const textZoneTop     = lastPhotoBottom + dateTextTopGap;
+    const textZoneBottom  = dateBaselineY - 20;
 
     const y = Math.max(textZoneTop + 10, Math.min((textZoneTop + textZoneBottom)/2, textZoneBottom - 10));
     const x = canvasW / 2;
@@ -428,7 +439,13 @@
     versionHistory: [
       { version: "V3.21", note: "스티커 단계 핸들 안정화(원 내부 클릭) + 버튼 크기 고정 + TIP 4줄" },
       { version: "V3.22", note: "문구 단계도 동일 방식(드래그/리사이즈/삭제/Del) 적용 + 완성하기 이동" },
-      { version: "V3.23", note: "✅ 사진 4칸 배치 레이아웃 통일 + 문구 기본 위치(4번째~날짜 사이) + 예쁜 글꼴 10개" }
+      { version: "V3.23", note: "사진 4칸 배치 레이아웃 통일 + 문구 기본 위치 + 예쁜 글꼴 10개" },
+      { version: "V3.24", note: "sound/intro + Ready/5~1/Shot MP3 촬영 + 준비완료 버튼" },
+      { version: "V3.25", note: "준비완료 버튼 5초 미입력 시 자동 촬영 시작" },
+      { version: "V3.26", note: "mp3 길이에 맞춘 표시/전환(ended 동기화) + intro 재생 보강" },
+      { version: "V3.28", note: "준비완료 자동시작 제거(클릭 필수) + 회차 간 대기 제거(바로 다음 촬영)" },
+      { version: "V3.30", note: "첫 화면 로딩 1초 후 intro 자동 재생(실패 시 첫 터치에서 1회 재시도)" },
+      { version: "V3.31", note: "첫 화면 아이콘/글자 정렬 및 크기 개선 + step-start 재진입 시마다 sound/intro.mp3 재생" }
     ],
 
     photos: [],
@@ -436,7 +453,6 @@
     frameStyle: '#ffffff',
     soundEnabled: true,
     isCapturing: false,
-    audioCtx: null,
     todayStr: new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit' }),
 
     stickers: [],
@@ -444,7 +460,14 @@
 
     selectedItem: null,
     selectedType: null,
-    currentTextColor: '#000000'
+    currentTextColor: '#000000',
+
+    _countdownRunning: false,
+
+    // ✅ V3.31 intro 재생 제어
+    _introTimer: null,
+    _introAudio: null,
+    _introGestureBound: false
   };
 
   const colors = [
@@ -473,11 +496,128 @@
     '🌻','🍁','🌙','☁️','🍒','🍩','🍔','🍟','🏀','⚽'
   ];
 
+  // =========================================================
+  // ✅ Sound helpers (V3.26 유지)
+  // =========================================================
+  function playSoundOnce(src){
+    if(!state.soundEnabled) return Promise.resolve(true);
+    const audio = new Audio(src);
+    audio.currentTime = 0;
+    audio.playsInline = true;
+    return audio.play().then(()=>true).catch(()=>false);
+  }
+
+  async function playSoundAwaitEnd(src){
+    if(!state.soundEnabled) return;
+
+    const audio = new Audio(src);
+    audio.currentTime = 0;
+    audio.playsInline = true;
+
+    const waitLoaded = new Promise(resolve => {
+      const done = () => resolve();
+      audio.addEventListener('loadedmetadata', done, { once:true });
+      audio.addEventListener('canplaythrough', done, { once:true });
+      setTimeout(done, 1200);
+    });
+    await waitLoaded;
+
+    try{
+      await audio.play();
+    }catch(e){
+      await new Promise(r => setTimeout(r, 700));
+      return;
+    }
+
+    await new Promise(resolve => {
+      audio.addEventListener('ended', resolve, { once:true });
+      setTimeout(resolve, 5000);
+    });
+  }
+
+  // =========================================================
+  // ✅ V3.31: step-start 진입 시마다 1초 후 sound/intro.mp3 재생
+  // - 실패 시 첫 사용자 제스처에서 1회 재시도
+  // =========================================================
+  function stopIntroPlayback(){
+    if(state._introTimer){
+      clearTimeout(state._introTimer);
+      state._introTimer = null;
+    }
+    if(state._introAudio){
+      try{
+        state._introAudio.pause();
+        state._introAudio.currentTime = 0;
+      }catch(e){}
+      state._introAudio = null;
+    }
+  }
+
+  function scheduleIntroOnStartEnter(){
+    // start 화면에 다시 들어올 때마다 새로 재생해야 하므로, 기존 예약/재생 정리
+    stopIntroPlayback();
+
+    // sound OFF면 재생 안 함
+    if(!state.soundEnabled) return;
+
+    const startStep = document.getElementById('step-start');
+    if(!startStep || startStep.classList.contains('hidden')) return;
+
+    state._introTimer = setTimeout(async () => {
+      // 여전히 start 화면인지 확인
+      const s = document.getElementById('step-start');
+      if(!s || s.classList.contains('hidden')) return;
+      if(!state.soundEnabled) return;
+
+      const audio = new Audio('sound/intro.mp3');
+      audio.currentTime = 0;
+      audio.playsInline = true;
+      state._introAudio = audio;
+
+      try{
+        await audio.play();
+        return;
+      }catch(e){
+        // 자동재생 제한 대비: 첫 제스처에서 1회 재시도
+        const onFirstGesture = async () => {
+          window.removeEventListener('pointerdown', onFirstGesture, true);
+          window.removeEventListener('touchstart', onFirstGesture, true);
+          window.removeEventListener('click', onFirstGesture, true);
+
+          // 다시 start 화면인지 확인
+          const ss = document.getElementById('step-start');
+          if(!ss || ss.classList.contains('hidden')) return;
+          if(!state.soundEnabled) return;
+
+          try{
+            const a2 = new Audio('sound/intro.mp3');
+            a2.currentTime = 0;
+            a2.playsInline = true;
+            state._introAudio = a2;
+            await a2.play();
+          }catch(_){}
+        };
+
+        window.addEventListener('pointerdown', onFirstGesture, true);
+        window.addEventListener('touchstart', onFirstGesture, true);
+        window.addEventListener('click', onFirstGesture, true);
+      }
+    }, 1000);
+  }
+
   // ---------- Step ----------
   function showStep(stepId){
     document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
     document.getElementById(stepId).classList.remove('hidden');
     lucide.createIcons();
+
+    // ✅ V3.31: start 화면 진입 시마다 intro 예약 재생
+    if(stepId === 'step-start'){
+      scheduleIntroOnStartEnter();
+    }else{
+      // 다른 화면으로 가면 intro 예약/재생 정리(중복 방지)
+      stopIntroPlayback();
+    }
 
     if(stepId === 'step-decorate-frame'){
       ensureCanvasSize('editor-canvas');
@@ -503,39 +643,7 @@
     }
   }
 
-  // ---------- Audio ----------
-  function initAudio(){ if(!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-
-  function playBeep(){
-    if(!state.soundEnabled) return; initAudio();
-    const osc = state.audioCtx.createOscillator();
-    const gain = state.audioCtx.createGain();
-    osc.connect(gain); gain.connect(state.audioCtx.destination);
-    osc.frequency.setValueAtTime(880, state.audioCtx.currentTime);
-    gain.gain.setValueAtTime(0, state.audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.12, state.audioCtx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + 0.12);
-    osc.start(); osc.stop(state.audioCtx.currentTime + 0.12);
-  }
-
-  function playDingDong(){
-    if(!state.soundEnabled) return; initAudio();
-    const playNote = (freq, start, duration) => {
-      const osc = state.audioCtx.createOscillator();
-      const gain = state.audioCtx.createGain();
-      osc.connect(gain); gain.connect(state.audioCtx.destination);
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, state.audioCtx.currentTime + start);
-      gain.gain.setValueAtTime(0, state.audioCtx.currentTime + start);
-      gain.gain.linearRampToValueAtTime(0.22, state.audioCtx.currentTime + start + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + start + duration);
-      osc.start(state.audioCtx.currentTime + start);
-      osc.stop(state.audioCtx.currentTime + start + duration);
-    };
-    playNote(659.25, 0, 0.35);
-    playNote(523.25, 0.22, 0.45);
-  }
-
+  // ---------- Audio Toggle UI ----------
   function syncSoundToggleUI(){
     const bg = document.getElementById('toggle-bg');
     const circle = document.getElementById('toggle-circle');
@@ -566,6 +674,12 @@
   function toggleSound(){
     state.soundEnabled = !state.soundEnabled;
     syncSoundToggleUI();
+
+    // ✅ start 화면이면 토글 변경에 따라 intro 재예약/정지
+    if(!document.getElementById('step-start').classList.contains('hidden')){
+      if(state.soundEnabled) scheduleIntroOnStartEnter();
+      else stopIntroPlayback();
+    }
   }
 
   // ---------- Camera ----------
@@ -577,13 +691,19 @@
     state.texts = [];
     state.selectedItem = null;
     state.selectedType = null;
+    state._countdownRunning = false;
 
     showStep('step-camera');
 
     try{
       const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user" }, audio:false });
       document.getElementById('video-feed').srcObject = stream;
-      runAutoCapture();
+
+      // ✅ 준비완료 버튼 표시(클릭해야만 시작)
+      const btn = document.getElementById('btn-ready');
+      btn.classList.remove('hidden');
+
+      document.getElementById('shot-count').innerText = '0';
     }catch(e){
       alert('카메라 권한을 확인해주세요.');
       stopCameraAndGoHome();
@@ -591,9 +711,12 @@
   }
 
   function stopCameraAndGoHome(){
+    state._countdownRunning = false;
     state.isCapturing = false;
     const video = document.getElementById('video-feed');
     if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+
+    // ✅ 요청: 촬영 취소 후 첫 화면 재진입 -> showStep이 intro 재생 처리
     showStep('step-start');
   }
 
@@ -602,51 +725,75 @@
     startCamera();
   }
 
-  async function runAutoCapture(){
+  // ✅ 준비완료 클릭 후 촬영(회차 간 2초 대기 제거)
+  async function startReadyCountdown(){
+    if(state._countdownRunning) return;
+    state._countdownRunning = true;
+
+    const btn = document.getElementById('btn-ready');
+    btn.classList.add('hidden');
+
     const video = document.getElementById('video-feed');
     const canvas = document.getElementById('capture-canvas');
+    const ctx = canvas.getContext('2d');
     const overlay = document.getElementById('countdown-overlay');
     const countdownText = document.getElementById('countdown-text');
-    const ctx = canvas.getContext('2d');
     const container = document.getElementById('camera-container');
 
-    for(let i=1; i<=6; i++){
-      if(!state.isCapturing) return;
-      document.getElementById('shot-count').innerText = i;
+    const sequence = [
+      { label:'Ready!', sound:'sound/ready.mp3' },
+      { label:'5', sound:'sound/5.mp3' },
+      { label:'4', sound:'sound/4.mp3' },
+      { label:'3', sound:'sound/3.mp3' },
+      { label:'2', sound:'sound/2.mp3' },
+      { label:'1', sound:'sound/1.mp3' },
+      { label:'Shot!', sound:'sound/shot.mp3', shot:true }
+    ];
 
-      overlay.classList.remove('hidden');
-      for(let c=3; c>=1; c--){
+    try{
+      for(let i=1; i<=6; i++){
         if(!state.isCapturing) return;
-        countdownText.innerText = c;
-        playBeep();
-        await new Promise(r => setTimeout(r, 1000));
+        document.getElementById('shot-count').innerText = i;
+
+        for(const step of sequence){
+          if(!state.isCapturing) return;
+
+          overlay.classList.remove('hidden');
+          countdownText.innerText = step.label;
+
+          if(step.shot){
+            container.classList.add('flash-effect');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0);
+
+            state.photos.push(canvas.toDataURL('image/jpeg', 0.95));
+          }
+
+          await playSoundAwaitEnd(step.sound);
+          container.classList.remove('flash-effect');
+        }
+
+        // ✅ 회차 간 2초 대기 제거
       }
+
       overlay.classList.add('hidden');
 
-      container.classList.add('flash-effect');
-      playDingDong();
+      if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      renderPhotoGrid();
+      showStep('step-select');
 
-      ctx.setTransform(1,0,0,1,0,0);
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0);
-
-      state.photos.push(canvas.toDataURL('image/jpeg', 0.95));
-
-      await new Promise(r => setTimeout(r, 450));
-      container.classList.remove('flash-effect');
+    } finally {
+      state._countdownRunning = false;
     }
-
-    const v = document.getElementById('video-feed');
-    if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
-
-    renderPhotoGrid();
-    showStep('step-select');
   }
 
   // ---------- Selection ----------
@@ -719,7 +866,6 @@
     });
   }
 
-  // ✅ (요청 1) drawFrameCanvas는 FRAME_LAYOUT 기준으로만 사진 배치
   async function drawFrameCanvas(canvasOrId){
     const canvas = (typeof canvasOrId === 'string') ? document.getElementById(canvasOrId) : canvasOrId;
     if(!canvas) return;
@@ -815,7 +961,6 @@
     const { delCx, delCy, resCx, resCy } = getHandleCentersFromBox(box);
     const r = HANDLE_VISUAL_R;
 
-    // delete X
     ctx.fillStyle = '#ef4444';
     ctx.beginPath(); ctx.arc(delCx, delCy, r, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = 'white';
@@ -827,7 +972,6 @@
     ctx.lineTo(delCx - r*0.55, delCy + r*0.55);
     ctx.stroke();
 
-    // resize ↗︎↙︎
     ctx.fillStyle = '#3b82f6';
     ctx.beginPath(); ctx.arc(resCx, resCy, r, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = 'white';
@@ -1001,7 +1145,6 @@
     const text = (ta.value || '').trim();
     if(!text) return alert('문구를 입력해 주세요.');
 
-    // ✅ (요청 2) 기본 위치: 4번째 사진과 날짜 사이 여백
     const pos = getDefaultTextPosition();
 
     const item = {
@@ -1269,7 +1412,10 @@
     state.selectedItem = null;
     state.selectedType = null;
     state.currentTextColor = '#000000';
+    state._countdownRunning = false;
     syncSoundToggleUI();
+
+    // ✅ 요청: 처음으로 버튼 -> 첫화면 재진입 -> showStep이 intro 처리
     showStep('step-start');
   }
 
@@ -1311,7 +1457,6 @@
     }
   });
 
-  // ---------- Audio Toggle Init ----------
   function initAudioUI(){
     syncSoundToggleUI();
   }
@@ -1320,7 +1465,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     initAudioUI();
-    showStep('step-start');
+    showStep('step-start'); // ✅ V3.31: 여기서 step-start 진입 -> intro 예약 재생
   });
 </script>
 </body>
