@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>행복네컷 (V3.31)</title>
+  <title>행복네컷 (V3.34)</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -64,7 +64,7 @@
     <header class="bg-white p-3 shadow-sm flex justify-center items-center z-10 shrink-0 h-14 border-b">
       <div class="flex items-center gap-2">
         <i data-lucide="camera" class="text-pink-500 w-6 h-6"></i>
-        <h1 class="text-xl font-jua text-pink-600">행복네컷 <span class="text-xs text-gray-400 font-normal">V3.31</span></h1>
+        <h1 class="text-xl font-jua text-pink-600">행복네컷 <span class="text-xs text-gray-400 font-normal">V3.34</span></h1>
       </div>
     </header>
 
@@ -84,7 +84,6 @@
               </p>
             </div>
 
-            <!-- ✅ V3.31: 아이콘/글자 정렬 + 크기 확대 -->
             <div class="grid grid-cols-4 gap-5 w-full pt-6 border-t border-pink-50">
               <div class="flex flex-col items-center justify-start gap-2">
                 <div class="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-500 shadow-sm">
@@ -149,7 +148,6 @@
             <span id="countdown-text" class="text-8xl font-bold text-white font-jua">Ready!</span>
           </div>
 
-          <!-- ✅ 준비완료 버튼: 반드시 클릭해야 촬영 시작 (자동 시작 제거) -->
           <button
             id="btn-ready"
             onclick="startReadyCountdown()"
@@ -327,7 +325,7 @@
   // =========================================================
   // ✅ Version control
   // =========================================================
-  const APP_VERSION = "V3.31";
+  const APP_VERSION = "V3.34";
 
   // =========================================================
   // ✅ Handle sizes
@@ -433,6 +431,42 @@
     return { x, y };
   }
 
+  // ✅ 시간 유지를 위한 헬퍼
+  const waitMs = (ms) => new Promise(r => setTimeout(r, ms));
+
+  async function waitForVideoReady(video, timeoutMs=3000){
+    if(!video) return false;
+
+    if(video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) return true;
+
+    return await new Promise(resolve => {
+      let done = false;
+      const finish = (ok) => {
+        if(done) return;
+        done = true;
+        cleanup();
+        resolve(ok);
+      };
+      const cleanup = () => {
+        video.removeEventListener('loadedmetadata', onReady);
+        video.removeEventListener('canplay', onReady);
+        video.removeEventListener('playing', onReady);
+      };
+      const onReady = () => {
+        if(video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) finish(true);
+      };
+
+      video.addEventListener('loadedmetadata', onReady);
+      video.addEventListener('canplay', onReady);
+      video.addEventListener('playing', onReady);
+
+      setTimeout(() => {
+        if(video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) finish(true);
+        else finish(false);
+      }, timeoutMs);
+    });
+  }
+
   // ---------- State ----------
   let state = {
     version: APP_VERSION,
@@ -445,7 +479,10 @@
       { version: "V3.26", note: "mp3 길이에 맞춘 표시/전환(ended 동기화) + intro 재생 보강" },
       { version: "V3.28", note: "준비완료 자동시작 제거(클릭 필수) + 회차 간 대기 제거(바로 다음 촬영)" },
       { version: "V3.30", note: "첫 화면 로딩 1초 후 intro 자동 재생(실패 시 첫 터치에서 1회 재시도)" },
-      { version: "V3.31", note: "첫 화면 아이콘/글자 정렬 및 크기 개선 + step-start 재진입 시마다 sound/intro.mp3 재생" }
+      { version: "V3.31", note: "첫 화면 아이콘/글자 정렬 및 크기 개선 + step-start 재진입 시마다 sound/intro.mp3 재생" },
+      { version: "V3.32", note: "촬영음 OFF여도 카운트다운/촬영 절차 시간 동일 유지(무음 지연) + 비디오 준비 대기 후 캡처" },
+      { version: "V3.33", note: "촬영음 OFF일 때 카운트다운 각 단계에 +1초 추가(준비시간 여유)" },
+      { version: "V3.34", note: "촬영음 OFF일 때 추가 대기시간을 +0.5초로 조정" }
     ],
 
     photos: [],
@@ -464,7 +501,6 @@
 
     _countdownRunning: false,
 
-    // ✅ V3.31 intro 재생 제어
     _introTimer: null,
     _introAudio: null,
     _introGestureBound: false
@@ -497,7 +533,7 @@
   ];
 
   // =========================================================
-  // ✅ Sound helpers (V3.26 유지)
+  // ✅ Sound helpers
   // =========================================================
   function playSoundOnce(src){
     if(!state.soundEnabled) return Promise.resolve(true);
@@ -535,9 +571,24 @@
     });
   }
 
+  // ✅ OFF일 때도 동일 절차 유지(무음 지연) + V3.34: 단계마다 +0.5초 추가
+  function getFallbackDelayMs(step){
+    if(step.label === 'Ready!') return 900;
+    if(step.shot) return 500;
+    return 650;
+  }
+  const OFF_EXTRA_DELAY_MS = 500; // ✅ V3.34 핵심(0.5초)
+
+  async function playStep(step){
+    if(state.soundEnabled){
+      await playSoundAwaitEnd(step.sound);
+    }else{
+      await waitMs(getFallbackDelayMs(step) + OFF_EXTRA_DELAY_MS);
+    }
+  }
+
   // =========================================================
-  // ✅ V3.31: step-start 진입 시마다 1초 후 sound/intro.mp3 재생
-  // - 실패 시 첫 사용자 제스처에서 1회 재시도
+  // ✅ intro 재생 제어
   // =========================================================
   function stopIntroPlayback(){
     if(state._introTimer){
@@ -554,17 +605,13 @@
   }
 
   function scheduleIntroOnStartEnter(){
-    // start 화면에 다시 들어올 때마다 새로 재생해야 하므로, 기존 예약/재생 정리
     stopIntroPlayback();
-
-    // sound OFF면 재생 안 함
     if(!state.soundEnabled) return;
 
     const startStep = document.getElementById('step-start');
     if(!startStep || startStep.classList.contains('hidden')) return;
 
     state._introTimer = setTimeout(async () => {
-      // 여전히 start 화면인지 확인
       const s = document.getElementById('step-start');
       if(!s || s.classList.contains('hidden')) return;
       if(!state.soundEnabled) return;
@@ -578,13 +625,11 @@
         await audio.play();
         return;
       }catch(e){
-        // 자동재생 제한 대비: 첫 제스처에서 1회 재시도
         const onFirstGesture = async () => {
           window.removeEventListener('pointerdown', onFirstGesture, true);
           window.removeEventListener('touchstart', onFirstGesture, true);
           window.removeEventListener('click', onFirstGesture, true);
 
-          // 다시 start 화면인지 확인
           const ss = document.getElementById('step-start');
           if(!ss || ss.classList.contains('hidden')) return;
           if(!state.soundEnabled) return;
@@ -611,11 +656,9 @@
     document.getElementById(stepId).classList.remove('hidden');
     lucide.createIcons();
 
-    // ✅ V3.31: start 화면 진입 시마다 intro 예약 재생
     if(stepId === 'step-start'){
       scheduleIntroOnStartEnter();
     }else{
-      // 다른 화면으로 가면 intro 예약/재생 정리(중복 방지)
       stopIntroPlayback();
     }
 
@@ -675,7 +718,6 @@
     state.soundEnabled = !state.soundEnabled;
     syncSoundToggleUI();
 
-    // ✅ start 화면이면 토글 변경에 따라 intro 재예약/정지
     if(!document.getElementById('step-start').classList.contains('hidden')){
       if(state.soundEnabled) scheduleIntroOnStartEnter();
       else stopIntroPlayback();
@@ -697,9 +739,9 @@
 
     try{
       const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user" }, audio:false });
-      document.getElementById('video-feed').srcObject = stream;
+      const video = document.getElementById('video-feed');
+      video.srcObject = stream;
 
-      // ✅ 준비완료 버튼 표시(클릭해야만 시작)
       const btn = document.getElementById('btn-ready');
       btn.classList.remove('hidden');
 
@@ -715,8 +757,6 @@
     state.isCapturing = false;
     const video = document.getElementById('video-feed');
     if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-
-    // ✅ 요청: 촬영 취소 후 첫 화면 재진입 -> showStep이 intro 재생 처리
     showStep('step-start');
   }
 
@@ -725,7 +765,7 @@
     startCamera();
   }
 
-  // ✅ 준비완료 클릭 후 촬영(회차 간 2초 대기 제거)
+  // ✅ 준비완료 클릭 후 촬영
   async function startReadyCountdown(){
     if(state._countdownRunning) return;
     state._countdownRunning = true;
@@ -751,6 +791,13 @@
     ];
 
     try{
+      const ok = await waitForVideoReady(video, 3500);
+      if(!ok){
+        alert('카메라 화면 준비가 지연되고 있어요. 다시 시도해 주세요.');
+        stopCameraAndGoHome();
+        return;
+      }
+
       for(let i=1; i<=6; i++){
         if(!state.isCapturing) return;
         document.getElementById('shot-count').innerText = i;
@@ -763,6 +810,15 @@
 
           if(step.shot){
             container.classList.add('flash-effect');
+
+            if(video.videoWidth <= 0 || video.videoHeight <= 0){
+              await waitMs(200);
+            }
+            if(video.videoWidth <= 0 || video.videoHeight <= 0){
+              alert('카메라 해상도를 읽지 못했어요. 다시 시도해 주세요.');
+              stopCameraAndGoHome();
+              return;
+            }
 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -777,11 +833,10 @@
             state.photos.push(canvas.toDataURL('image/jpeg', 0.95));
           }
 
-          await playSoundAwaitEnd(step.sound);
+          await playStep(step);
+
           container.classList.remove('flash-effect');
         }
-
-        // ✅ 회차 간 2초 대기 제거
       }
 
       overlay.classList.add('hidden');
@@ -1414,8 +1469,6 @@
     state.currentTextColor = '#000000';
     state._countdownRunning = false;
     syncSoundToggleUI();
-
-    // ✅ 요청: 처음으로 버튼 -> 첫화면 재진입 -> showStep이 intro 처리
     showStep('step-start');
   }
 
@@ -1465,7 +1518,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     initAudioUI();
-    showStep('step-start'); // ✅ V3.31: 여기서 step-start 진입 -> intro 예약 재생
+    showStep('step-start');
   });
 </script>
 </body>
