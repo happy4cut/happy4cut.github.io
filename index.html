@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>행복네컷 (V3.34)</title>
+  <title>행복네컷 (V3.44)</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- ✅ 예쁜 글꼴 10개(설치 없이 사용) -->
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&family=Nanum+Pen+Script&family=Nanum+Gothic:wght@400;700&family=Gaegu:wght@400;700&family=Poor+Story&family=Dongle:wght@300;400;700&family=Hi+Melody&family=Do+Hyeon&family=Gowun+Dodum&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -55,6 +54,62 @@
     .sticker-item:active{transform:scale(.9);background:#fce7f3;border-color:#f472b6;}
 
     .font-selector{padding:8px;border-radius:8px;border:1px solid #e5e7eb;font-size:14px;cursor:pointer;}
+
+    .cam-pill{
+      display:flex; align-items:center; justify-content:center;
+      gap:6px;
+      padding:10px 12px;
+      border-radius:9999px;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      box-shadow:0 1px 3px rgba(0,0,0,.06);
+      cursor:pointer;
+      transition:all .15s;
+      font-family:'Jua',sans-serif;
+      font-size:16px;
+      color:#374151;
+      min-width:150px;
+      white-space:nowrap;
+    }
+    .cam-pill.active{
+      border-color:#ec4899;
+      box-shadow:0 0 0 3px rgba(236,72,153,.18);
+      color:#be185d;
+    }
+    .cam-pill:active{ transform:scale(.98); }
+
+    .mini-input{
+      width:100%;
+      padding:8px 10px;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      background:#f9fafb;
+      font-size:13px;
+      outline:none;
+    }
+    .mini-input:focus{ box-shadow:0 0 0 3px rgba(236,72,153,.16); border-color:#f9a8d4; }
+
+    /* ✅ 원형 색상 버튼(현재색 표시) */
+    .color-circle-btn{
+      width:30px;height:30px;border-radius:9999px;
+      border:2px solid #fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.12);
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+
+    /* ✅ 팝업(팔레트) */
+    .palette-pop{
+      position:absolute;
+      left:0; right:0;
+      top:42px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      box-shadow:0 10px 25px rgba(0,0,0,.12);
+      padding:12px;
+      z-index:50;
+    }
   </style>
 </head>
 
@@ -64,11 +119,50 @@
     <header class="bg-white p-3 shadow-sm flex justify-center items-center z-10 shrink-0 h-14 border-b">
       <div class="flex items-center gap-2">
         <i data-lucide="camera" class="text-pink-500 w-6 h-6"></i>
-        <h1 class="text-xl font-jua text-pink-600">행복네컷 <span class="text-xs text-gray-400 font-normal">V3.34</span></h1>
+        <h1 class="text-xl font-jua text-pink-600">행복네컷 <span class="text-xs text-gray-400 font-normal">V3.44</span></h1>
       </div>
     </header>
 
     <main class="flex-1 relative w-full flex flex-col items-center overflow-hidden bg-gray-50">
+
+      <!-- ✅ 텍스트 편집 모달 (선택 문구 수정 패널 제거 대체) -->
+      <div id="text-edit-modal" class="hidden absolute inset-0 z-[999] bg-black/40 flex items-center justify-center p-4">
+        <div class="w-full max-w-[420px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+          <div class="px-4 py-3 border-b flex items-center justify-between">
+            <span class="font-jua text-lg text-pink-600">문구 편집</span>
+            <button onclick="closeTextEditModal()" class="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-700 font-jua active:scale-95 transition">닫기</button>
+          </div>
+
+          <div class="p-4 flex flex-col gap-3">
+            <textarea id="modal-text-content" rows="3" class="w-full p-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 text-sm resize-none" placeholder="내용을 입력하세요 (최대 2줄)"></textarea>
+
+            <div class="grid grid-cols-2 gap-2">
+              <select id="modal-font-selector" class="font-selector bg-white">
+                <option value="Jua" selected>주아체</option>
+                <option value="Gowun Dodum">고운돋움</option>
+                <option value="Do Hyeon">도현체</option>
+                <option value="Gaegu">개구쟁이</option>
+                <option value="Hi Melody">하이멜로디</option>
+                <option value="Dongle">동글</option>
+                <option value="Poor Story">푸어스토리</option>
+                <option value="Nanum Pen Script">나눔펜</option>
+                <option value="Nanum Gothic">나눔고딕</option>
+                <option value="Noto Sans KR">노토산스</option>
+              </select>
+              <input id="modal-font-size" type="number" min="18" max="140" class="mini-input" value="56" />
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button onclick="applyTextEditModal()" class="flex-1 bg-pink-500 text-white py-3 rounded-xl font-jua shadow active:scale-95 transition">적용</button>
+              <button onclick="deleteFromTextEditModal()" class="flex-1 bg-red-500 text-white py-3 rounded-xl font-jua shadow active:scale-95 transition">삭제</button>
+            </div>
+
+            <p class="text-[11px] text-gray-500 leading-snug">
+              캔버스에서 문구를 클릭하면 선택됩니다. (드래그=이동/핸들=크기)
+            </p>
+          </div>
+        </div>
+      </div>
 
       <!-- 1 Start -->
       <section id="step-start" class="text-center w-full h-full flex flex-col p-6 overflow-y-auto hide-scrollbar">
@@ -91,21 +185,18 @@
                 </div>
                 <span class="text-[12px] font-jua text-gray-600 leading-none">촬영</span>
               </div>
-
               <div class="flex flex-col items-center justify-start gap-2">
                 <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-sm">
                   <i data-lucide="check-square" class="w-6 h-6"></i>
                 </div>
                 <span class="text-[12px] font-jua text-gray-600 leading-none">선택</span>
               </div>
-
               <div class="flex flex-col items-center justify-start gap-2">
                 <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-500 shadow-sm">
                   <i data-lucide="palette" class="w-6 h-6"></i>
                 </div>
                 <span class="text-[12px] font-jua text-gray-600 leading-none">프레임</span>
               </div>
-
               <div class="flex flex-col items-center justify-start gap-2">
                 <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-500 shadow-sm">
                   <i data-lucide="smile" class="w-6 h-6"></i>
@@ -116,9 +207,33 @@
           </div>
         </div>
 
-        <div class="flex flex-col items-center gap-6 mb-8 mt-4">
-          <div class="flex items-center bg-white px-6 py-4 rounded-full shadow-sm border border-gray-100 gap-4">
-            <span class="font-jua text-gray-700 text-xl">촬영음</span>
+        <div class="flex flex-col items-center gap-6 mb-8 mt-2">
+          <!-- ✅ 아이콘/글자 버튼 중앙 정렬 강화 -->
+          <button id="btn-start-camera" onclick="startCamera()"
+            class="w-[240px] h-[70px] bg-pink-500 text-white font-jua text-2xl rounded-[1.8rem] shadow-lg hover:bg-pink-600 transition active:scale-95 border-b-4 border-pink-700 flex items-center justify-center">
+            <span class="flex items-center justify-center gap-2 w-full">
+              <i data-lucide="camera" class="w-7 h-7"></i>
+              <span>촬영 시작</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2 Camera -->
+      <section id="step-camera" class="hidden flex flex-col items-center w-full h-full px-4 pt-3 pb-3">
+
+        <div class="w-full max-w-[460px] bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 mb-3">
+          <div class="flex items-center justify-center gap-2 flex-wrap">
+            <button id="btn-cam-front" class="cam-pill active" onclick="switchCamera('user')">
+              <i data-lucide="user" class="w-4 h-4 text-pink-500"></i> 전면 카메라
+            </button>
+            <button id="btn-cam-back" class="cam-pill" onclick="switchCamera('environment')">
+              <i data-lucide="camera" class="w-4 h-4 text-gray-600"></i> 후면 카메라
+            </button>
+          </div>
+
+          <div class="mt-3 flex items-center justify-center gap-3">
+            <span class="font-jua text-gray-700 text-lg">촬영음</span>
             <div class="flex items-center gap-3">
               <span id="label-off-ext" class="text-sm font-bold text-gray-400 transition-colors">OFF</span>
 
@@ -131,17 +246,13 @@
               <span id="label-on-ext" class="text-sm font-bold text-pink-500 transition-colors">ON</span>
             </div>
           </div>
-
-          <button id="btn-start-camera" onclick="startCamera()"
-            class="w-[240px] h-[70px] bg-pink-500 text-white font-jua text-2xl rounded-[1.8rem] shadow-lg flex items-center justify-center gap-2 hover:bg-pink-600 transition active:scale-95 border-b-4 border-pink-700">
-            <i data-lucide="camera" class="w-7 h-7"></i> 촬영 시작
-          </button>
         </div>
-      </section>
 
-      <!-- 2 Camera -->
-      <section id="step-camera" class="hidden flex flex-col items-center w-full h-full p-4">
-        <div id="camera-container" class="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden shadow-xl mb-6 flex items-center justify-center border-4 border-white">
+        <div id="camera-container"
+             class="relative w-full max-w-[460px]
+                    bg-black rounded-2xl overflow-hidden shadow-xl
+                    flex items-center justify-center border-4 border-white
+                    aspect-[3/4] max-h-[58dvh]">
           <video id="video-feed" autoplay playsinline class="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]"></video>
 
           <div id="countdown-overlay" class="absolute inset-0 flex items-center justify-center bg-black/30 hidden z-20">
@@ -159,22 +270,46 @@
             준비 완료!
           </button>
 
-          <div class="absolute top-4 right-4 bg-black/50 text-white px-4 py-2 rounded-full font-mono text-xl z-10">
+          <div class="absolute top-3 right-3 bg-black/50 text-white px-4 py-2 rounded-full font-mono text-lg z-10">
             <span id="shot-count">0</span> / 6
           </div>
         </div>
 
-        <button onclick="stopCameraAndGoHome()" class="w-full max-w-xs bg-gray-400 text-white py-5 rounded-xl font-jua text-2xl shadow active:scale-95 transition">촬영 취소</button>
+        <div class="w-full max-w-[460px] mt-3">
+          <button onclick="stopCameraAndGoHome()"
+                  class="w-full bg-gray-400 text-white py-4 rounded-xl font-jua text-2xl shadow active:scale-95 transition">
+            촬영 취소
+          </button>
+        </div>
+
         <canvas id="capture-canvas" class="hidden"></canvas>
       </section>
 
       <!-- 3 Select -->
       <section id="step-select" class="hidden flex flex-col items-center w-full h-full p-6 overflow-hidden">
-        <div class="shrink-0 mb-6 text-center">
+        <div class="shrink-0 mb-3 text-center w-full">
           <h2 class="text-2xl font-jua text-pink-600">4장을 선택하세요!</h2>
           <p class="text-gray-500 font-medium mt-1 text-base">(<span id="selected-count" class="text-pink-500">0</span> / 4)</p>
+
+          <div class="mt-3 flex items-center justify-center gap-2">
+            <input id="file-add-photos" type="file" accept="image/*" multiple class="hidden" onchange="handleAddPhotos(event)" />
+            <button onclick="document.getElementById('file-add-photos').click()"
+              class="bg-white border border-pink-200 text-pink-600 font-jua px-4 py-2 rounded-full shadow-sm active:scale-95 transition flex items-center gap-2">
+              <i data-lucide="image-plus" class="w-4 h-4"></i> 사진 추가
+            </button>
+            <button onclick="clearAddedPhotosOnly()"
+              class="bg-white border border-gray-200 text-gray-600 font-jua px-4 py-2 rounded-full shadow-sm active:scale-95 transition flex items-center gap-2">
+              <i data-lucide="trash-2" class="w-4 h-4"></i> 추가분만 삭제
+            </button>
+          </div>
+
+          <p class="text-[11px] text-gray-400 mt-2">
+            촬영한 사진 외에 기기 사진을 추가할 수 있어요. (추가 사진도 4장 선택 대상)
+          </p>
         </div>
+
         <div id="photo-grid" class="grid grid-cols-2 gap-2 w-full overflow-y-auto flex-1 hide-scrollbar mb-4 px-20 content-center"></div>
+
         <div class="w-full flex gap-4 h-16 shrink-0">
           <button onclick="restartCamera()" class="flex-1 bg-gray-400 text-white font-jua text-xl rounded-2xl shadow-md active:scale-95 transition">재촬영</button>
           <button id="btn-confirm-select" onclick="goToFrameStep()" disabled class="flex-[2] bg-gray-300 text-white font-jua text-2xl rounded-2xl shadow-md active:scale-95 transition">선택 완료</button>
@@ -211,15 +346,10 @@
             <h3 class="text-lg font-jua text-pink-500 mb-2 text-center border-b pb-3 shrink-0">스티커 선택</h3>
             <div id="sticker-grid" class="flex-1 overflow-y-auto hide-scrollbar grid grid-cols-3 gap-y-4 gap-x-2 py-4 content-start justify-items-center"></div>
 
-            <p id="sticker-tip" class="text-[11px] text-gray-400 mt-2 leading-snug">
-              스티커 선택 후 드래그=이동<br>
-              우상단 X표 선택=삭제<br>
-              (키보드 Del 키 클릭도 삭제)<br>
-              우하단 양쪽화살표 드래그=크기조절
-            </p>
+            <!-- ✅ 설명 문구 제거(요청사항) -->
           </div>
 
-          <div class="flex-1 flex items-center justify-center bg-gray-200/40 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden p-3 relative">
+          <div class="flex-1 flex items-center justify-center bg-gray-200/40 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden p-3">
             <div class="preview-container">
               <div class="canvas-wrapper">
                 <canvas id="bg-canvas-sticker" class="layer-canvas"></canvas>
@@ -238,15 +368,24 @@
       <!-- 6 Text -->
       <section id="step-decorate-text" class="hidden flex flex-col items-center w-full h-full p-4 overflow-hidden">
         <div class="flex-1 w-full flex overflow-hidden gap-4 mb-4">
-          <div class="flex-1 bg-white rounded-2xl p-4 shadow-md border border-gray-100 flex flex-col gap-3">
+          <div class="flex-1 bg-white rounded-2xl p-4 shadow-md border border-gray-100 flex flex-col gap-3 overflow-hidden">
+            <!-- ✅ "문구 입력/수정" -> "문구 입력" -->
             <h3 class="text-lg font-jua text-pink-500 mb-1 text-center border-b pb-3 shrink-0">문구 입력</h3>
 
-            <div class="flex flex-col gap-2">
-              <textarea id="input-text-content" rows="2" placeholder="문구를 입력하세요 (최대 2줄)"
-                class="w-full p-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 font-gothic text-sm resize-none"></textarea>
+            <!-- ✅ 제목 박스 -->
+            <div class="rounded-xl border border-pink-100 bg-pink-50/40 p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-bold text-pink-600 font-jua">제목</span>
+                <button onclick="applyTitleFromInputs()"
+                        class="bg-pink-500 text-white px-3 py-1.5 rounded-xl font-jua shadow-sm hover:bg-pink-600 active:scale-95 transition">
+                  적용
+                </button>
+              </div>
 
-              <div class="flex gap-2">
-                <select id="font-selector" class="font-selector flex-1 bg-gray-50">
+              <input id="input-title-content" class="mini-input" placeholder="예: 우리 반 추억" />
+
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <select id="title-font-selector" class="font-selector bg-white">
                   <option value="Jua" selected>주아체</option>
                   <option value="Gowun Dodum">고운돋움</option>
                   <option value="Do Hyeon">도현체</option>
@@ -258,25 +397,104 @@
                   <option value="Nanum Gothic">나눔고딕</option>
                   <option value="Noto Sans KR">노토산스</option>
                 </select>
+                <input id="title-font-size" type="number" min="18" max="140" class="mini-input" value="68" />
+              </div>
 
-                <button onclick="addTextItem()" class="bg-pink-500 text-white px-4 py-2 rounded-xl font-jua shadow-sm hover:bg-pink-600 active:scale-95 transition">추가</button>
+              <!-- ✅ 제목 색깔: 글꼴 선택 아래로 이동 -->
+              <div class="mt-3 relative">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-bold text-pink-600 font-jua">제목 색깔</span>
+
+                  <div class="flex items-center gap-2">
+                    <button id="btn-title-color-circle" class="color-circle-btn" onclick="toggleTitlePalette()" title="제목 색깔"></button>
+                    <button class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 font-jua shadow-sm active:scale-95 transition" onclick="toggleTitleCustom()">
+                      원하는 색상
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 추천 팔레트 -->
+                <div id="title-palette-pop" class="palette-pop hidden">
+                  <div class="grid grid-cols-5 gap-2">
+                    <!-- JS inject -->
+                  </div>
+                </div>
+
+                <!-- 커스텀 색상 -->
+                <div id="title-custom-pop" class="palette-pop hidden">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-sm text-gray-700 font-jua">색상 선택</span>
+                    <input id="title-color-picker" type="color" class="w-14 h-10 p-0 border-0 bg-transparent" />
+                  </div>
+                  <button class="mt-3 w-full bg-pink-500 text-white py-2 rounded-xl font-jua shadow active:scale-95 transition" onclick="applyTitlePickerColor()">적용</button>
+                </div>
               </div>
             </div>
 
-            <div class="flex-1 flex flex-col overflow-hidden">
-              <label class="text-xs font-bold text-gray-400 mb-2">글자 색상</label>
-              <div id="text-color-dots" class="flex-1 overflow-y-auto hide-scrollbar grid grid-cols-4 gap-2 content-start justify-items-center p-1"></div>
+            <!-- ✅ (아래) 원하는 내용 입력: 제목과 같은 색/글꼴 -->
+            <div class="mt-4">
+              <div class="text-pink-600 font-jua font-bold mb-2">(아래) 원하는 내용 입력</div>
+
+              <!-- ✅ 하단 문구 입력창도 둥근 사각형 배경 -->
+              <div class="rounded-xl border border-pink-100 bg-pink-50/40 p-3">
+                <textarea id="input-text-content" rows="2" placeholder="하단 문구를 입력하세요 (최대 2줄)"
+                  class="w-full p-2 border rounded-xl bg-white/80 focus:outline-none focus:ring-2 focus:ring-pink-300 font-gothic text-sm resize-none"></textarea>
+
+                <div class="flex gap-2 mt-2">
+                  <select id="font-selector" class="font-selector flex-1 bg-white">
+                    <option value="Jua" selected>주아체</option>
+                    <option value="Gowun Dodum">고운돋움</option>
+                    <option value="Do Hyeon">도현체</option>
+                    <option value="Gaegu">개구쟁이</option>
+                    <option value="Hi Melody">하이멜로디</option>
+                    <option value="Dongle">동글</option>
+                    <option value="Poor Story">푸어스토리</option>
+                    <option value="Nanum Pen Script">나눔펜</option>
+                    <option value="Nanum Gothic">나눔고딕</option>
+                    <option value="Noto Sans KR">노토산스</option>
+                  </select>
+
+                  <button onclick="addTextItem()" class="bg-pink-500 text-white px-4 py-2 rounded-xl font-jua shadow-sm hover:bg-pink-600 active:scale-95 transition">추가</button>
+                </div>
+
+                <!-- ✅ 문구 색깔: 옆 텍스트 제거 + 원형 버튼 + 추천/원하는색상 -->
+                <div class="mt-3 relative">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-gray-700 font-jua">문구 색깔</span>
+                    <div class="flex items-center gap-2">
+                      <button id="btn-body-color-circle" class="color-circle-btn" onclick="toggleBodyPalette()" title="문구 색깔"></button>
+                      <button class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 font-jua shadow-sm active:scale-95 transition" onclick="toggleBodyCustom()">
+                        원하는 색상
+                      </button>
+                    </div>
+                  </div>
+
+                  <div id="body-palette-pop" class="palette-pop hidden">
+                    <div class="grid grid-cols-5 gap-2">
+                      <!-- JS inject -->
+                    </div>
+                  </div>
+
+                  <div id="body-custom-pop" class="palette-pop hidden">
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-sm text-gray-700 font-jua">색상 선택</span>
+                      <input id="body-color-picker" type="color" class="w-14 h-10 p-0 border-0 bg-transparent" />
+                    </div>
+                    <button class="mt-3 w-full bg-pink-500 text-white py-2 rounded-xl font-jua shadow active:scale-95 transition" onclick="applyBodyPickerColor()">적용</button>
+                  </div>
+                </div>
+
+                <!-- ✅ 안내 문구(요청 문구로) -->
+                <p class="text-[11px] text-gray-500 mt-3 leading-snug">
+                  캔버스에서 문구를 클릭하면 선택됩니다. (드래그=이동/핸들=크기)
+                </p>
+              </div>
             </div>
 
-            <p id="text-tip" class="text-[11px] text-gray-400 leading-snug">
-              문구 입력 후 드래그=이동<br>
-              우상단 X표 선택=삭제<br>
-              (키보드 Del 키 클릭도 삭제)<br>
-              우하단 양쪽화살표 드래그=크기 조절
-            </p>
+            <!-- ✅ "선택 문구 수정" 관련 UI 제거 완료 -->
           </div>
 
-          <div class="flex-1 flex items-center justify-center bg-gray-200/40 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden p-3 relative">
+          <div class="flex-1 flex items-center justify-center bg-gray-200/40 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden p-3">
             <div class="preview-container">
               <div class="canvas-wrapper">
                 <canvas id="bg-canvas-text" class="layer-canvas"></canvas>
@@ -325,7 +543,7 @@
   // =========================================================
   // ✅ Version control
   // =========================================================
-  const APP_VERSION = "V3.34";
+  const APP_VERSION = "V3.44";
 
   // =========================================================
   // ✅ Handle sizes
@@ -345,7 +563,7 @@
     startY: 180,
     gapY: 30,
     photoAspectH: 0.72,
-    dateBottomPadding: 60,
+    dateBottomPadding: 110,
     dateTextTopGap: 40
   };
 
@@ -379,64 +597,10 @@
     return (dx*dx + dy*dy) <= (HANDLE_HIT_R * HANDLE_HIT_R);
   }
 
-  function drawImageCover(ctx, img, dx, dy, dWidth, dHeight) {
-    const sWidth = img.naturalWidth || img.width;
-    const sHeight = img.naturalHeight || img.height;
-    const srcAspect = sWidth / sHeight;
-    const destAspect = dWidth / dHeight;
-
-    let sx, sy, sw, sh;
-    if (srcAspect > destAspect) {
-      sh = sHeight;
-      sw = sh * destAspect;
-      sx = (sWidth - sw) / 2;
-      sy = 0;
-    } else {
-      sw = sWidth;
-      sh = sw / destAspect;
-      sx = 0;
-      sy = (sHeight - sh) / 2;
-    }
-    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dWidth, dHeight);
-  }
-
-  function fillTextWithSpacing(ctx, text, x, y, spacingPx){
-    const chars = Array.from(text);
-    const widths = chars.map(ch => ctx.measureText(ch).width);
-    const total = widths.reduce((a,b)=>a+b,0) + spacingPx * (chars.length - 1);
-
-    let startX = x;
-    if(ctx.textAlign === 'center') startX = x - total/2;
-    else if(ctx.textAlign === 'right' || ctx.textAlign === 'end') startX = x - total;
-
-    let cursor = startX;
-    for(let i=0; i<chars.length; i++){
-      ctx.fillText(chars[i], cursor + widths[i]/2, y);
-      cursor += widths[i] + spacingPx;
-    }
-  }
-
-  function getDefaultTextPosition(){
-    const { canvasW, canvasH, marginX, startY, gapY, photoAspectH, dateBottomPadding, dateTextTopGap } = FRAME_LAYOUT;
-    const imgW = canvasW - (marginX * 2);
-    const imgH = imgW * photoAspectH;
-
-    const lastPhotoBottom = startY + 3*(imgH + gapY) + imgH;
-    const dateBaselineY   = canvasH - dateBottomPadding;
-    const textZoneTop     = lastPhotoBottom + dateTextTopGap;
-    const textZoneBottom  = dateBaselineY - 20;
-
-    const y = Math.max(textZoneTop + 10, Math.min((textZoneTop + textZoneBottom)/2, textZoneBottom - 10));
-    const x = canvasW / 2;
-    return { x, y };
-  }
-
-  // ✅ 시간 유지를 위한 헬퍼
   const waitMs = (ms) => new Promise(r => setTimeout(r, ms));
 
   async function waitForVideoReady(video, timeoutMs=3000){
     if(!video) return false;
-
     if(video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) return true;
 
     return await new Promise(resolve => {
@@ -470,23 +634,11 @@
   // ---------- State ----------
   let state = {
     version: APP_VERSION,
-    versionHistory: [
-      { version: "V3.21", note: "스티커 단계 핸들 안정화(원 내부 클릭) + 버튼 크기 고정 + TIP 4줄" },
-      { version: "V3.22", note: "문구 단계도 동일 방식(드래그/리사이즈/삭제/Del) 적용 + 완성하기 이동" },
-      { version: "V3.23", note: "사진 4칸 배치 레이아웃 통일 + 문구 기본 위치 + 예쁜 글꼴 10개" },
-      { version: "V3.24", note: "sound/intro + Ready/5~1/Shot MP3 촬영 + 준비완료 버튼" },
-      { version: "V3.25", note: "준비완료 버튼 5초 미입력 시 자동 촬영 시작" },
-      { version: "V3.26", note: "mp3 길이에 맞춘 표시/전환(ended 동기화) + intro 재생 보강" },
-      { version: "V3.28", note: "준비완료 자동시작 제거(클릭 필수) + 회차 간 대기 제거(바로 다음 촬영)" },
-      { version: "V3.30", note: "첫 화면 로딩 1초 후 intro 자동 재생(실패 시 첫 터치에서 1회 재시도)" },
-      { version: "V3.31", note: "첫 화면 아이콘/글자 정렬 및 크기 개선 + step-start 재진입 시마다 sound/intro.mp3 재생" },
-      { version: "V3.32", note: "촬영음 OFF여도 카운트다운/촬영 절차 시간 동일 유지(무음 지연) + 비디오 준비 대기 후 캡처" },
-      { version: "V3.33", note: "촬영음 OFF일 때 카운트다운 각 단계에 +1초 추가(준비시간 여유)" },
-      { version: "V3.34", note: "촬영음 OFF일 때 추가 대기시간을 +0.5초로 조정" }
-    ],
 
     photos: [],
+    photoSources: [],
     selectedIndices: [],
+
     frameStyle: '#ffffff',
     soundEnabled: true,
     isCapturing: false,
@@ -495,15 +647,29 @@
     stickers: [],
     texts: [],
 
+    titleEnabled: false,
+    titleText: {
+      id: 'title-text',
+      role: 'title',
+      text: '행복네컷',
+      x: FRAME_LAYOUT.canvasW/2,
+      y: FRAME_LAYOUT.titleY + 70,
+      fontSize: 68,
+      fontFamily: 'Jua',
+      color: null
+    },
+
     selectedItem: null,
     selectedType: null,
-    currentTextColor: '#000000',
+
+    // ✅ 현재 문구 기본색(새 문구 + 선택 문구에 적용)
+    currentBodyColor: '#000000',
 
     _countdownRunning: false,
 
-    _introTimer: null,
-    _introAudio: null,
-    _introGestureBound: false
+    cameraFacing: 'user',
+    cameraDeviceIds: { user: null, environment: null },
+    _stream: null
   };
 
   const colors = [
@@ -514,13 +680,11 @@
     '#bae1ff', '#BAE1FF', '#C7CEEA', '#A2D2FF', '#00D2FC', '#4D8076'
   ];
 
-  const textColorPalette = [
-    '#000000', '#ffffff', '#4b5563', '#94a3b8',
-    '#ef4444', '#f97316', '#facc15', '#22c55e',
-    '#10b981', '#06b6d4', '#3b82f6', '#6366f1',
-    '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
-    '#78350f', '#451a03', '#134e4a', '#1e1b4b',
-    '#fca5a5', '#fef08a', '#bbf7d0', '#bfdbfe'
+  // ✅ 은은한 파스텔 추천 15
+  const pastel15 = [
+    '#FFD1DC', '#FFB7C5', '#FFC9DE', '#FAD0C4', '#FFE5B4',
+    '#FFF5BA', '#FFFFD1', '#E2F0CB', '#C7E9B0', '#B5EAD7',
+    '#C7CEEA', '#BAE1FF', '#A2D2FF', '#D7C0FF', '#F3C4FB'
   ];
 
   const stickerList = [
@@ -533,16 +697,249 @@
   ];
 
   // =========================================================
-  // ✅ Sound helpers
+  // ✅ Title positioning helpers
   // =========================================================
-  function playSoundOnce(src){
-    if(!state.soundEnabled) return Promise.resolve(true);
-    const audio = new Audio(src);
-    audio.currentTime = 0;
-    audio.playsInline = true;
-    return audio.play().then(()=>true).catch(()=>false);
+  function getTitleDefaultPosition(fontSize){
+    const safeTop = 20;
+    const safeBottom = FRAME_LAYOUT.startY - 20;
+    const y = Math.max(safeTop + fontSize*0.6, Math.min(safeBottom - fontSize*0.3, FRAME_LAYOUT.titleY + 70));
+    return { x: FRAME_LAYOUT.canvasW/2, y };
   }
 
+  function defaultTitleColorForFrame(){
+    const isDark = ['#000000','#1f2937','#4b5563'].includes(state.frameStyle);
+    return isDark ? '#ffffff' : '#ec4899';
+  }
+
+  function getAllTextItems(){
+    return state.titleEnabled ? [state.titleText, ...state.texts] : [...state.texts];
+  }
+  function isTitleItem(it){ return it && it.role === 'title'; }
+
+  function syncTitleInputsFromState(){
+    const t = state.titleText;
+    const inp = document.getElementById('input-title-content');
+    const fs = document.getElementById('title-font-selector');
+    const sz = document.getElementById('title-font-size');
+    if(inp) inp.value = t.text || '';
+    if(fs) fs.value = t.fontFamily || 'Jua';
+    if(sz) sz.value = t.fontSize || 68;
+  }
+
+  function applyTitleFromInputs(){
+    const inp = document.getElementById('input-title-content');
+    const fs = document.getElementById('title-font-selector');
+    const sz = document.getElementById('title-font-size');
+
+    const text = (inp?.value || '').trim() || '행복네컷';
+    const fontFamily = fs?.value || 'Jua';
+    const fontSize = Math.min(140, Math.max(18, parseInt(sz?.value || '68', 10)));
+
+    state.titleEnabled = true;
+    state.titleText.text = text;
+    state.titleText.fontFamily = fontFamily;
+    state.titleText.fontSize = fontSize;
+
+    const pos = getTitleDefaultPosition(fontSize);
+    state.titleText.x = pos.x;
+    state.titleText.y = pos.y;
+
+    state.selectedType = 'text';
+    state.selectedItem = state.titleText;
+
+    if(isStepVisible('step-decorate-text')){
+      renderTexts();
+      drawBaseWithStickers('bg-canvas-text');
+      syncTitleColorCircleUI();
+    }
+  }
+
+  // =========================================================
+  // ✅ Select step: Add existing photos
+  // =========================================================
+  async function handleAddPhotos(event){
+    const files = Array.from(event.target.files || []);
+    if(!files.length) return;
+
+    for(const f of files){
+      if(!f.type || !f.type.startsWith('image/')) continue;
+      const dataUrl = await readFileAsDataURL(f);
+      state.photos.push(dataUrl);
+      state.photoSources.push('added');
+    }
+
+    event.target.value = '';
+    renderPhotoGrid();
+    lucide.createIcons();
+  }
+
+  function readFileAsDataURL(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function clearAddedPhotosOnly(){
+    const keep = [];
+    const keepSrc = [];
+    const oldToNew = new Map();
+
+    for(let i=0;i<state.photos.length;i++){
+      const src = state.photoSources[i] || 'shot';
+      if(src === 'added') continue;
+      oldToNew.set(i, keep.length);
+      keep.push(state.photos[i]);
+      keepSrc.push(src);
+    }
+
+    const newSel = [];
+    for(const oldIdx of state.selectedIndices){
+      if(oldToNew.has(oldIdx)) newSel.push(oldToNew.get(oldIdx));
+    }
+
+    state.photos = keep;
+    state.photoSources = keepSrc;
+    state.selectedIndices = newSel;
+
+    renderPhotoGrid();
+    updateSelectionUI();
+  }
+
+  // =========================================================
+  // ✅ Camera helpers
+  // =========================================================
+  async function stopStream(){
+    const video = document.getElementById('video-feed');
+    try{
+      if(video && video.srcObject){
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+    }catch(_){}
+    state._stream = null;
+  }
+
+  function normalizeLabel(s){ return String(s||'').toLowerCase(); }
+
+  async function refreshCameraDeviceCache(){
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+
+    const isBack = (label) =>
+      /back|rear|environment|후면|뒤|트리플|울트라|wide|tele|망원/.test(label);
+    const isFront = (label) =>
+      /front|user|face|전면|앞|self|셀프/.test(label);
+
+    let back = cams.find(d => isBack(normalizeLabel(d.label)));
+    let front = cams.find(d => isFront(normalizeLabel(d.label)));
+
+    if(!front && cams.length >= 1) front = cams[0];
+    if(!back && cams.length >= 2) back = cams[cams.length - 1];
+
+    state.cameraDeviceIds.user = front ? front.deviceId : null;
+    state.cameraDeviceIds.environment = back ? back.deviceId : null;
+  }
+
+  async function startStreamWithFacing(){
+    const video = document.getElementById('video-feed');
+
+    const wantId = state.cameraFacing === 'environment'
+      ? state.cameraDeviceIds.environment
+      : state.cameraDeviceIds.user;
+
+    let stream = null;
+
+    if(wantId){
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: wantId } },
+          audio: false
+        });
+      }catch(e){
+        stream = null;
+      }
+    }
+
+    if(!stream){
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: state.cameraFacing } },
+          audio: false
+        });
+      }catch(e){
+        stream = null;
+      }
+    }
+
+    if(!stream){
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: state.cameraFacing } },
+        audio: false
+      });
+    }
+
+    state._stream = stream;
+    video.srcObject = stream;
+
+    if(state.cameraFacing === 'environment'){
+      video.classList.remove('scale-x-[-1]');
+    }else{
+      video.classList.add('scale-x-[-1]');
+    }
+
+    try{ await refreshCameraDeviceCache(); }catch(_){}
+
+    try{
+      const track = stream.getVideoTracks()[0];
+      const caps = track && track.getCapabilities ? track.getCapabilities() : null;
+      if(caps && typeof caps.zoom !== 'undefined'){
+        await track.applyConstraints({ advanced: [{ zoom: 1.0 }] });
+      }
+    }catch(_){}
+
+    return stream;
+  }
+
+  async function setCameraFacing(facing, restartIfOnCamera=false){
+    state.cameraFacing = (facing === 'environment') ? 'environment' : 'user';
+
+    const front = document.getElementById('btn-cam-front');
+    const back  = document.getElementById('btn-cam-back');
+    if(front && back){
+      if(state.cameraFacing === 'user'){
+        front.classList.add('active'); back.classList.remove('active');
+      }else{
+        back.classList.add('active'); front.classList.remove('active');
+      }
+    }
+    lucide.createIcons();
+
+    if(restartIfOnCamera && isStepVisible('step-camera') && state.isCapturing){
+      const btn = document.getElementById('btn-ready');
+      if(btn){
+        btn.style.display = '';
+        btn.classList.remove('hidden');
+      }
+
+      await stopStream();
+      try{
+        await startStreamWithFacing();
+      }catch(e){
+        alert('카메라 전환에 실패했어요. (권한/기기/브라우저 확인)');
+      }
+    }
+  }
+
+  async function switchCamera(facing){
+    await setCameraFacing(facing, true);
+  }
+
+  // =========================================================
+  // ✅ Sound helpers
+  // =========================================================
   async function playSoundAwaitEnd(src){
     if(!state.soundEnabled) return;
 
@@ -571,13 +968,12 @@
     });
   }
 
-  // ✅ OFF일 때도 동일 절차 유지(무음 지연) + V3.34: 단계마다 +0.5초 추가
   function getFallbackDelayMs(step){
     if(step.label === 'Ready!') return 900;
     if(step.shot) return 500;
     return 650;
   }
-  const OFF_EXTRA_DELAY_MS = 500; // ✅ V3.34 핵심(0.5초)
+  const OFF_EXTRA_DELAY_MS = 500;
 
   async function playStep(step){
     if(state.soundEnabled){
@@ -588,79 +984,12 @@
   }
 
   // =========================================================
-  // ✅ intro 재생 제어
+  // ✅ Step switch
   // =========================================================
-  function stopIntroPlayback(){
-    if(state._introTimer){
-      clearTimeout(state._introTimer);
-      state._introTimer = null;
-    }
-    if(state._introAudio){
-      try{
-        state._introAudio.pause();
-        state._introAudio.currentTime = 0;
-      }catch(e){}
-      state._introAudio = null;
-    }
-  }
-
-  function scheduleIntroOnStartEnter(){
-    stopIntroPlayback();
-    if(!state.soundEnabled) return;
-
-    const startStep = document.getElementById('step-start');
-    if(!startStep || startStep.classList.contains('hidden')) return;
-
-    state._introTimer = setTimeout(async () => {
-      const s = document.getElementById('step-start');
-      if(!s || s.classList.contains('hidden')) return;
-      if(!state.soundEnabled) return;
-
-      const audio = new Audio('sound/intro.mp3');
-      audio.currentTime = 0;
-      audio.playsInline = true;
-      state._introAudio = audio;
-
-      try{
-        await audio.play();
-        return;
-      }catch(e){
-        const onFirstGesture = async () => {
-          window.removeEventListener('pointerdown', onFirstGesture, true);
-          window.removeEventListener('touchstart', onFirstGesture, true);
-          window.removeEventListener('click', onFirstGesture, true);
-
-          const ss = document.getElementById('step-start');
-          if(!ss || ss.classList.contains('hidden')) return;
-          if(!state.soundEnabled) return;
-
-          try{
-            const a2 = new Audio('sound/intro.mp3');
-            a2.currentTime = 0;
-            a2.playsInline = true;
-            state._introAudio = a2;
-            await a2.play();
-          }catch(_){}
-        };
-
-        window.addEventListener('pointerdown', onFirstGesture, true);
-        window.addEventListener('touchstart', onFirstGesture, true);
-        window.addEventListener('click', onFirstGesture, true);
-      }
-    }, 1000);
-  }
-
-  // ---------- Step ----------
   function showStep(stepId){
     document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
     document.getElementById(stepId).classList.remove('hidden');
     lucide.createIcons();
-
-    if(stepId === 'step-start'){
-      scheduleIntroOnStartEnter();
-    }else{
-      stopIntroPlayback();
-    }
 
     if(stepId === 'step-decorate-frame'){
       ensureCanvasSize('editor-canvas');
@@ -677,22 +1006,40 @@
     }
 
     if(stepId === 'step-decorate-text'){
+      if(!state.titleEnabled){
+        state.titleEnabled = true;
+        state.titleText.text = state.titleText.text || '행복네컷';
+        state.titleText.fontFamily = state.titleText.fontFamily || 'Jua';
+        state.titleText.fontSize = state.titleText.fontSize || 68;
+        state.titleText.color = state.titleText.color ?? null;
+
+        const pos = getTitleDefaultPosition(state.titleText.fontSize);
+        state.titleText.x = pos.x;
+        state.titleText.y = pos.y;
+      }
+
       ensureCanvasSize('bg-canvas-text');
       ensureCanvasSize('text-canvas');
       drawBaseWithStickers('bg-canvas-text');
-      initTextColorPalette();
       initTextInteractionEvents('text-canvas');
       renderTexts();
+      syncTitleInputsFromState();
+
+      initTitleColorUI();
+      initBodyColorUI();
     }
   }
 
-  // ---------- Audio Toggle UI ----------
+  // =========================================================
+  // ✅ Audio Toggle UI
+  // =========================================================
   function syncSoundToggleUI(){
     const bg = document.getElementById('toggle-bg');
     const circle = document.getElementById('toggle-circle');
     const icon = document.getElementById('sound-icon');
     const labelOff = document.getElementById('label-off-ext');
     const labelOn = document.getElementById('label-on-ext');
+    if(!bg || !circle || !icon || !labelOff || !labelOn) return;
 
     if(state.soundEnabled){
       bg.classList.remove('bg-gray-300');
@@ -717,33 +1064,41 @@
   function toggleSound(){
     state.soundEnabled = !state.soundEnabled;
     syncSoundToggleUI();
-
-    if(!document.getElementById('step-start').classList.contains('hidden')){
-      if(state.soundEnabled) scheduleIntroOnStartEnter();
-      else stopIntroPlayback();
-    }
   }
 
-  // ---------- Camera ----------
+  // =========================================================
+  // ✅ Camera flow
+  // =========================================================
   async function startCamera(){
     state.isCapturing = true;
+
     state.photos = [];
+    state.photoSources = [];
     state.selectedIndices = [];
+
     state.stickers = [];
     state.texts = [];
     state.selectedItem = null;
     state.selectedType = null;
     state._countdownRunning = false;
 
+    state.titleEnabled = false;
+
     showStep('step-camera');
+    syncSoundToggleUI();
 
     try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user" }, audio:false });
-      const video = document.getElementById('video-feed');
-      video.srcObject = stream;
+      try{ await refreshCameraDeviceCache(); }catch(_){}
 
+      await stopStream();
+      await startStreamWithFacing();
+
+      // ✅ "준비 완료" 버튼 확실히 표시(이전 상태 영향 제거)
       const btn = document.getElementById('btn-ready');
-      btn.classList.remove('hidden');
+      if(btn){
+        btn.style.display = '';
+        btn.classList.remove('hidden');
+      }
 
       document.getElementById('shot-count').innerText = '0';
     }catch(e){
@@ -752,11 +1107,10 @@
     }
   }
 
-  function stopCameraAndGoHome(){
+  async function stopCameraAndGoHome(){
     state._countdownRunning = false;
     state.isCapturing = false;
-    const video = document.getElementById('video-feed');
-    if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+    await stopStream();
     showStep('step-start');
   }
 
@@ -765,13 +1119,16 @@
     startCamera();
   }
 
-  // ✅ 준비완료 클릭 후 촬영
   async function startReadyCountdown(){
     if(state._countdownRunning) return;
     state._countdownRunning = true;
 
     const btn = document.getElementById('btn-ready');
-    btn.classList.add('hidden');
+    // ✅ "준비 완료" 버튼이 안 사라지는 문제 방지(클래스+display 이중 처리)
+    if(btn){
+      btn.classList.add('hidden');
+      btn.style.display = 'none';
+    }
 
     const video = document.getElementById('video-feed');
     const canvas = document.getElementById('capture-canvas');
@@ -826,22 +1183,23 @@
             ctx.setTransform(1,0,0,1,0,0);
             ctx.clearRect(0,0,canvas.width,canvas.height);
 
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
+            if(state.cameraFacing === 'user'){
+              ctx.translate(canvas.width, 0);
+              ctx.scale(-1, 1);
+            }
             ctx.drawImage(video, 0, 0);
 
             state.photos.push(canvas.toDataURL('image/jpeg', 0.95));
+            state.photoSources.push('shot');
           }
 
           await playStep(step);
-
           container.classList.remove('flash-effect');
         }
       }
 
       overlay.classList.add('hidden');
-
-      if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      await stopStream();
 
       renderPhotoGrid();
       showStep('step-select');
@@ -851,16 +1209,24 @@
     }
   }
 
-  // ---------- Selection ----------
+  // =========================================================
+  // ✅ Selection
+  // =========================================================
   function renderPhotoGrid(){
     const grid = document.getElementById('photo-grid');
     grid.innerHTML = '';
 
     state.photos.forEach((src, idx) => {
       const div = document.createElement('div');
+      const srcType = state.photoSources[idx] || 'shot';
       div.className = 'relative photo-card bg-white rounded-xl overflow-hidden shadow-md cursor-pointer aspect-square border-2 border-transparent transition-all';
       div.onclick = () => togglePhotoSelection(idx);
-      div.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
+
+      const badge = (srcType === 'added')
+        ? `<div class="absolute left-2 top-2 z-10 bg-black/40 text-white text-[10px] px-2 py-1 rounded-full">추가</div>`
+        : '';
+
+      div.innerHTML = `${badge}<img src="${src}" class="w-full h-full object-cover">`;
       grid.appendChild(div);
     });
 
@@ -890,7 +1256,9 @@
       }
     });
 
-    document.getElementById('selected-count').innerText = state.selectedIndices.length;
+    const cnt = document.getElementById('selected-count');
+    if(cnt) cnt.innerText = state.selectedIndices.length;
+
     const btn = document.getElementById('btn-confirm-select');
     btn.disabled = state.selectedIndices.length !== 4;
     btn.className = `flex-[2] font-jua rounded-2xl shadow-md transition text-2xl ${
@@ -898,7 +1266,86 @@
     }`;
   }
 
-  // ---------- Frame ----------
+  // =========================================================
+  // ✅ Frame draw
+  // =========================================================
+  async function drawFrameCanvas(canvasOrId){
+    const canvas = (typeof canvasOrId === 'string') ? document.getElementById(canvasOrId) : canvasOrId;
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    ensureCanvasSize(canvas.id || canvas, FRAME_LAYOUT.canvasW, FRAME_LAYOUT.canvasH);
+
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle = state.frameStyle;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    const { marginX, startY, gapY, photoAspectH } = FRAME_LAYOUT;
+    const imgW = canvas.width - (marginX * 2);
+    const imgH = imgW * photoAspectH;
+
+    for(let i=0;i<4;i++){
+      const pIdx = state.selectedIndices[i];
+      if(pIdx === undefined) continue;
+
+      const x = marginX;
+      const y = startY + i*(imgH + gapY);
+
+      const img = new Image();
+      img.src = state.photos[pIdx];
+
+      await new Promise(r => {
+        img.onload = () => {
+          const sW = img.naturalWidth || img.width;
+          const sH = img.naturalHeight || img.height;
+
+          const srcAspect = sW / sH;
+          const destAspect = imgW / imgH;
+
+          let drawW, drawH;
+          if(srcAspect > destAspect){
+            drawH = imgH;
+            drawW = drawH * srcAspect;
+          }else{
+            drawW = imgW;
+            drawH = drawW / srcAspect;
+          }
+
+          const dx = x + (imgW - drawW)/2;
+          const dy = y + (imgH - drawH)/2;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x, y, imgW, imgH);
+          ctx.clip();
+          ctx.drawImage(img, dx, dy, drawW, drawH);
+          ctx.restore();
+
+          ctx.save();
+          ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, imgW, imgH);
+          ctx.restore();
+
+          r();
+        };
+        img.onerror = () => r();
+      });
+    }
+
+    const isDark = ['#000000','#1f2937','#4b5563'].includes(state.frameStyle);
+    ctx.fillStyle = isDark ? '#aaaaaa' : '#555555';
+    ctx.font = '30px Noto Sans KR';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(state.todayStr, canvas.width/2, canvas.height - FRAME_LAYOUT.dateBottomPadding);
+  }
+
+  // =========================================================
+  // ✅ Frame step
+  // =========================================================
   function goToFrameStep(){
     initColorPalette();
     showStep('step-decorate-frame');
@@ -921,56 +1368,9 @@
     });
   }
 
-  async function drawFrameCanvas(canvasOrId){
-    const canvas = (typeof canvasOrId === 'string') ? document.getElementById(canvasOrId) : canvasOrId;
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    ensureCanvasSize(canvas.id || canvas, FRAME_LAYOUT.canvasW, FRAME_LAYOUT.canvasH);
-
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    ctx.fillStyle = state.frameStyle;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    const isDark = ['#000000','#1f2937','#4b5563'].includes(state.frameStyle);
-    ctx.fillStyle = isDark ? '#ffffff' : '#ec4899';
-
-    ctx.font = '68px Jua';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    fillTextWithSpacing(ctx, '행복네컷', canvas.width/2, FRAME_LAYOUT.titleY, 14);
-
-    const margin = FRAME_LAYOUT.marginX;
-    const imgW = canvas.width - (margin * 2);
-    const imgH = imgW * FRAME_LAYOUT.photoAspectH;
-    const startY = FRAME_LAYOUT.startY;
-    const gap = FRAME_LAYOUT.gapY;
-
-    for(let i=0; i<4; i++){
-      const pIdx = state.selectedIndices[i];
-      if(pIdx !== undefined){
-        const img = new Image();
-        img.src = state.photos[pIdx];
-        await new Promise(r => {
-          img.onload = () => {
-            drawImageCover(ctx, img, margin, startY + (i * (imgH + gap)), imgW, imgH);
-            r();
-          };
-          img.onerror = () => r();
-        });
-      }
-    }
-
-    ctx.fillStyle = isDark ? '#aaaaaa' : '#555555';
-    ctx.font = '30px Noto Sans KR';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(state.todayStr, canvas.width/2, canvas.height - FRAME_LAYOUT.dateBottomPadding);
-  }
-
-  // ---------- Sticker ----------
+  // =========================================================
+  // ✅ Sticker
+  // =========================================================
   function renderStickerGrid(){
     const grid = document.getElementById('sticker-grid');
     grid.innerHTML = '';
@@ -1072,6 +1472,16 @@
     }
   }
 
+  function deleteSelectedSticker(){
+    if(!(state.selectedType === 'sticker' && state.selectedItem)) return;
+    const id = state.selectedItem.id;
+    const idx = state.stickers.findIndex(s => s.id === id);
+    if(idx > -1) state.stickers.splice(idx, 1);
+    state.selectedItem = null;
+    state.selectedType = null;
+    renderStickers();
+  }
+
   function initStickerInteractionEvents(canvasId){
     const canvas = document.getElementById(canvasId);
     if(!canvas) return;
@@ -1106,14 +1516,6 @@
       return null;
     }
 
-    function deleteStickerById(id){
-      const idx = state.stickers.findIndex(s => s.id === id);
-      if(idx > -1) state.stickers.splice(idx, 1);
-      state.selectedItem = null;
-      state.selectedType = null;
-      renderStickers();
-    }
-
     canvas.onpointerdown = (e) => {
       const p = getCanvasPoint(canvas, e.clientX, e.clientY);
       const hit = pickSticker(p);
@@ -1130,7 +1532,7 @@
       renderStickers();
 
       if(hit.onDel){
-        deleteStickerById(hit.item.id);
+        deleteSelectedSticker(); // ✅ X표 삭제
         return;
       }
 
@@ -1171,27 +1573,38 @@
     canvas.onpointercancel = () => { active = null; };
   }
 
-  // ---------- Text ----------
-  function initTextColorPalette(){
-    const wrap = document.getElementById('text-color-dots');
-    if(!wrap) return;
-    wrap.innerHTML = '';
-    textColorPalette.forEach(col => {
-      const d = document.createElement('div');
-      d.className = 'color-dot';
-      d.style.backgroundColor = col;
-      if(col.toLowerCase() === (state.currentTextColor||'').toLowerCase()) d.classList.add('active');
-      d.onclick = () => {
-        state.currentTextColor = col;
-        wrap.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active'));
-        d.classList.add('active');
+  // ✅ 키보드 Del 로 스티커 삭제
+  function onGlobalKeyDown(e){
+    const key = e.key || '';
+    if(key === 'Delete' || key === 'Backspace'){
+      if(isStepVisible('step-decorate-sticker')){
+        deleteSelectedSticker();
+      }
+      if(isStepVisible('step-decorate-text')){
+        // 텍스트 단계에서도 선택된 문구 삭제 가능(모달 없이도)
         if(state.selectedType === 'text' && state.selectedItem){
-          state.selectedItem.color = col;
-          renderTexts();
+          deleteTextById(state.selectedItem.id);
         }
-      };
-      wrap.appendChild(d);
-    });
+      }
+    }
+  }
+
+  // =========================================================
+  // ✅ Text
+  // =========================================================
+  function getDefaultTextPosition(){
+    const { canvasW, canvasH, marginX, startY, gapY, photoAspectH, dateBottomPadding, dateTextTopGap } = FRAME_LAYOUT;
+    const imgW = canvasW - (marginX * 2);
+    const imgH = imgW * photoAspectH;
+
+    const lastPhotoBottom = startY + 3*(imgH + gapY) + imgH;
+    const dateBaselineY   = canvasH - dateBottomPadding;
+    const textZoneTop     = lastPhotoBottom + dateTextTopGap;
+    const textZoneBottom  = dateBaselineY - 20;
+
+    const y = Math.max(textZoneTop + 10, Math.min((textZoneTop + textZoneBottom)/2, textZoneBottom - 10));
+    const x = canvasW / 2;
+    return { x, y };
   }
 
   function addTextItem(){
@@ -1204,18 +1617,22 @@
 
     const item = {
       id: makeId(),
+      role: 'body',
       text,
       x: pos.x,
       y: pos.y,
       fontSize: 56,
       fontFamily: fs.value || 'Jua',
-      color: state.currentTextColor || '#000000'
+      color: state.currentBodyColor || '#000000'
     };
     state.texts.push(item);
+
     state.selectedItem = item;
     state.selectedType = 'text';
+
     ta.value = '';
     renderTexts();
+    drawBaseWithStickers('bg-canvas-text');
   }
 
   function getTextBoxCanvas(ctx, t){
@@ -1253,13 +1670,18 @@
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    state.texts.forEach(t => {
+    const all = getAllTextItems();
+
+    all.forEach(t => {
       ctx.save();
       ctx.translate(t.x, t.y);
       const fs = t.fontSize || 46;
       const ff = t.fontFamily || 'Jua';
       ctx.font = `${fs}px ${ff}`;
-      ctx.fillStyle = t.color || '#000';
+
+      const col = (isTitleItem(t) ? (t.color ?? defaultTitleColorForFrame()) : (t.color || '#000'));
+      ctx.fillStyle = col;
+
       ctx.textAlign='center';
       ctx.textBaseline='middle';
 
@@ -1276,6 +1698,90 @@
     }
   }
 
+  function deleteTextById(id){
+    if(id === state.titleText.id){
+      state.titleText.text = '행복네컷';
+      state.titleText.fontFamily = 'Jua';
+      state.titleText.fontSize = 68;
+      state.titleText.color = null;
+
+      const pos = getTitleDefaultPosition(state.titleText.fontSize);
+      state.titleText.x = pos.x;
+      state.titleText.y = pos.y;
+
+      syncTitleInputsFromState();
+      syncTitleColorCircleUI();
+      renderTexts();
+      drawBaseWithStickers('bg-canvas-text');
+      return;
+    }
+
+    const idx = state.texts.findIndex(t => t.id === id);
+    if(idx > -1) state.texts.splice(idx, 1);
+    state.selectedItem = null;
+    state.selectedType = null;
+    renderTexts();
+    drawBaseWithStickers('bg-canvas-text');
+  }
+
+  // ✅ 탭하면 모달로 내용/글꼴 변경(드래그는 그대로)
+  let modalTargetId = null;
+
+  function openTextEditModal(item){
+    if(!item) return;
+    modalTargetId = item.id;
+
+    const m = document.getElementById('text-edit-modal');
+    const ta = document.getElementById('modal-text-content');
+    const fs = document.getElementById('modal-font-selector');
+    const sz = document.getElementById('modal-font-size');
+
+    ta.value = String(item.text || '').slice(0, 300);
+    fs.value = item.fontFamily || 'Jua';
+    sz.value = String(item.fontSize || 56);
+
+    m.classList.remove('hidden');
+  }
+
+  function closeTextEditModal(){
+    document.getElementById('text-edit-modal').classList.add('hidden');
+    modalTargetId = null;
+  }
+
+  function applyTextEditModal(){
+    if(!modalTargetId) return;
+    const it = getAllTextItems().find(x => x.id === modalTargetId);
+    if(!it) return closeTextEditModal();
+
+    const ta = document.getElementById('modal-text-content');
+    const fs = document.getElementById('modal-font-selector');
+    const sz = document.getElementById('modal-font-size');
+
+    const newText = (ta.value || '').trim();
+    if(!newText) return alert('내용을 입력해 주세요.');
+
+    it.text = newText.split('\n').slice(0,2).join('\n'); // 최대 2줄
+    it.fontFamily = fs.value || it.fontFamily || 'Jua';
+    it.fontSize = Math.min(140, Math.max(18, parseInt(sz.value || it.fontSize || 56, 10)));
+
+    if(isTitleItem(it)){
+      syncTitleInputsFromState();
+    }
+
+    state.selectedItem = it;
+    state.selectedType = 'text';
+
+    renderTexts();
+    drawBaseWithStickers('bg-canvas-text');
+    closeTextEditModal();
+  }
+
+  function deleteFromTextEditModal(){
+    if(!modalTargetId) return;
+    deleteTextById(modalTargetId);
+    closeTextEditModal();
+  }
+
   function initTextInteractionEvents(canvasId){
     const canvas = document.getElementById(canvasId);
     if(!canvas) return;
@@ -1288,6 +1794,7 @@
     canvas.onpointercancel = null;
 
     let active = null;
+    let downInfo = null;
 
     function hitBox(p, box){
       return (p.x >= box.x1 && p.x <= box.x2 && p.y >= box.y1 && p.y <= box.y2);
@@ -1295,8 +1802,10 @@
 
     function pickText(p){
       const ctx = canvas.getContext('2d');
-      for(let i = state.texts.length - 1; i >= 0; i--){
-        const it = state.texts[i];
+      const all = getAllTextItems();
+
+      for(let i = all.length - 1; i >= 0; i--){
+        const it = all[i];
         const box = getTextBoxCanvas(ctx, it);
         const { delCx, delCy, resCx, resCy } = getHandleCentersFromBox(box);
 
@@ -1311,17 +1820,11 @@
       return null;
     }
 
-    function deleteTextById(id){
-      const idx = state.texts.findIndex(t => t.id === id);
-      if(idx > -1) state.texts.splice(idx, 1);
-      state.selectedItem = null;
-      state.selectedType = null;
-      renderTexts();
-    }
-
     canvas.onpointerdown = (e) => {
       const p = getCanvasPoint(canvas, e.clientX, e.clientY);
       const hit = pickText(p);
+
+      downInfo = { x:p.x, y:p.y, moved:false, hit: hit };
 
       if(!hit){
         state.selectedItem = null;
@@ -1356,6 +1859,11 @@
       if(!active) return;
       const p = getCanvasPoint(canvas, e.clientX, e.clientY);
 
+      if(downInfo){
+        const dist = Math.hypot(p.x - downInfo.x, p.y - downInfo.y);
+        if(dist > 6) downInfo.moved = true;
+      }
+
       if(active.mode === 'drag'){
         active.item.x = p.x + active.offsetX;
         active.item.y = p.y + active.offsetY;
@@ -1372,14 +1880,23 @@
       }
     };
 
-    canvas.onpointerup = () => { active = null; };
-    canvas.onpointercancel = () => { active = null; };
+    canvas.onpointerup = () => {
+      // ✅ 드래그가 아니고(거의 움직임 없음) 몸통 클릭이면 모달 오픈
+      if(downInfo && downInfo.hit && downInfo.hit.onBody && !downInfo.moved){
+        openTextEditModal(downInfo.hit.item);
+      }
+      active = null;
+      downInfo = null;
+    };
+    canvas.onpointercancel = () => { active = null; downInfo = null; };
   }
 
   async function drawBaseWithStickers(canvasId){
     const canvas = (typeof canvasId === 'string') ? document.getElementById(canvasId) : canvasId;
     if(!canvas) return;
+
     await drawFrameCanvas(canvas);
+
     const ctx = canvas.getContext('2d');
     state.stickers.forEach(s => {
       ctx.save();
@@ -1392,7 +1909,162 @@
     });
   }
 
-  // ---------- Result ----------
+  // =========================================================
+  // ✅ Title/Body Color UI
+  // =========================================================
+  function setTitleColor(col){
+    state.titleText.color = col;
+    syncTitleColorCircleUI();
+    if(isStepVisible('step-decorate-text')){
+      renderTexts();
+      drawBaseWithStickers('bg-canvas-text');
+    }
+  }
+
+  function setBodyColor(col){
+    state.currentBodyColor = col;
+    syncBodyColorCircleUI();
+
+    // ✅ 선택된 문구가 body면 즉시 적용
+    if(state.selectedType === 'text' && state.selectedItem && !isTitleItem(state.selectedItem)){
+      state.selectedItem.color = col;
+      renderTexts();
+      drawBaseWithStickers('bg-canvas-text');
+    }
+  }
+
+  function syncTitleColorCircleUI(){
+    const btn = document.getElementById('btn-title-color-circle');
+    if(!btn) return;
+    btn.style.backgroundColor = state.titleText.color ?? defaultTitleColorForFrame();
+  }
+
+  function syncBodyColorCircleUI(){
+    const btn = document.getElementById('btn-body-color-circle');
+    if(!btn) return;
+    btn.style.backgroundColor = state.currentBodyColor || '#000000';
+  }
+
+  function closeAllPalettes(){
+    ['title-palette-pop','title-custom-pop','body-palette-pop','body-custom-pop'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.classList.add('hidden');
+    });
+  }
+
+  function initTitleColorUI(){
+    // circle
+    syncTitleColorCircleUI();
+
+    // palette inject
+    const pop = document.getElementById('title-palette-pop');
+    if(pop){
+      const grid = pop.querySelector('.grid');
+      grid.innerHTML = '';
+      pastel15.forEach(c=>{
+        const d = document.createElement('div');
+        d.className = 'color-dot';
+        d.style.backgroundColor = c;
+        d.onclick = () => { setTitleColor(c); closeAllPalettes(); };
+        grid.appendChild(d);
+      });
+    }
+
+    const picker = document.getElementById('title-color-picker');
+    if(picker){
+      picker.value = (state.titleText.color ?? defaultTitleColorForFrame());
+    }
+  }
+
+  function initBodyColorUI(){
+    syncBodyColorCircleUI();
+
+    const pop = document.getElementById('body-palette-pop');
+    if(pop){
+      const grid = pop.querySelector('.grid');
+      grid.innerHTML = '';
+      pastel15.forEach(c=>{
+        const d = document.createElement('div');
+        d.className = 'color-dot';
+        d.style.backgroundColor = c;
+        d.onclick = () => { setBodyColor(c); closeAllPalettes(); };
+        grid.appendChild(d);
+      });
+    }
+
+    const picker = document.getElementById('body-color-picker');
+    if(picker){
+      picker.value = (state.currentBodyColor || '#000000');
+    }
+  }
+
+  function toggleTitlePalette(){
+    const pop = document.getElementById('title-palette-pop');
+    if(!pop) return;
+    const isOpen = !pop.classList.contains('hidden');
+    closeAllPalettes();
+    if(!isOpen) pop.classList.remove('hidden');
+  }
+  function toggleTitleCustom(){
+    const pop = document.getElementById('title-custom-pop');
+    if(!pop) return;
+    const picker = document.getElementById('title-color-picker');
+    if(picker) picker.value = (state.titleText.color ?? defaultTitleColorForFrame());
+    const isOpen = !pop.classList.contains('hidden');
+    closeAllPalettes();
+    if(!isOpen) pop.classList.remove('hidden');
+  }
+  function applyTitlePickerColor(){
+    const picker = document.getElementById('title-color-picker');
+    if(!picker) return;
+    setTitleColor(picker.value);
+    closeAllPalettes();
+  }
+
+  function toggleBodyPalette(){
+    const pop = document.getElementById('body-palette-pop');
+    if(!pop) return;
+    const isOpen = !pop.classList.contains('hidden');
+    closeAllPalettes();
+    if(!isOpen) pop.classList.remove('hidden');
+  }
+  function toggleBodyCustom(){
+    const pop = document.getElementById('body-custom-pop');
+    if(!pop) return;
+    const picker = document.getElementById('body-color-picker');
+    if(picker) picker.value = (state.currentBodyColor || '#000000');
+    const isOpen = !pop.classList.contains('hidden');
+    closeAllPalettes();
+    if(!isOpen) pop.classList.remove('hidden');
+  }
+  function applyBodyPickerColor(){
+    const picker = document.getElementById('body-color-picker');
+    if(!picker) return;
+    setBodyColor(picker.value);
+    closeAllPalettes();
+  }
+
+  // 팝업 바깥 클릭 시 닫기
+  document.addEventListener('pointerdown', (e)=>{
+    const ids = ['title-palette-pop','title-custom-pop','body-palette-pop','body-custom-pop'];
+    const isIn = ids.some(id=>{
+      const el = document.getElementById(id);
+      return el && !el.classList.contains('hidden') && el.contains(e.target);
+    });
+
+    const isBtn =
+      (document.getElementById('btn-title-color-circle')?.contains(e.target)) ||
+      (document.getElementById('btn-body-color-circle')?.contains(e.target)) ||
+      (e.target?.closest('button') && (e.target.closest('button').textContent||'').includes('원하는 색상'));
+
+    if(!isIn && !isBtn){
+      closeAllPalettes();
+    }
+  }, { passive:true });
+
+  // =========================================================
+  // ✅ Result
+  // =========================================================
   async function buildFinalCanvases(){
     const baseW = FRAME_LAYOUT.canvasW, baseH = FRAME_LAYOUT.canvasH;
 
@@ -1412,13 +2084,14 @@
       octx.restore();
     });
 
-    state.texts.forEach(t => {
+    const all = getAllTextItems();
+    all.forEach(t => {
       octx.save();
       octx.translate(t.x, t.y);
       const fs = t.fontSize || 46;
       const ff = t.fontFamily || 'Jua';
       octx.font = `${fs}px ${ff}`;
-      octx.fillStyle = t.color || '#000';
+      octx.fillStyle = (isTitleItem(t) ? (t.color ?? defaultTitleColorForFrame()) : (t.color || '#000'));
       octx.textAlign='center'; octx.textBaseline='middle';
       const lines = String(t.text||'').split('\n').slice(0,2);
       const lineH = fs*1.15;
@@ -1460,65 +2133,46 @@
 
   function resetToHome(){
     state.photos = [];
+    state.photoSources = [];
     state.selectedIndices = [];
     state.frameStyle = '#ffffff';
+
     state.stickers = [];
     state.texts = [];
     state.selectedItem = null;
     state.selectedType = null;
-    state.currentTextColor = '#000000';
+
+    state.currentBodyColor = '#000000';
     state._countdownRunning = false;
+
+    state.titleEnabled = false;
+    state.titleText.text = '행복네컷';
+    state.titleText.fontFamily = 'Jua';
+    state.titleText.fontSize = 68;
+    state.titleText.color = null;
+
+    setCameraFacing('user', false);
     syncSoundToggleUI();
     showStep('step-start');
   }
 
-  // ---------- Delete key ----------
+  // ---------- helpers ----------
   function isStepVisible(stepId){
     const el = document.getElementById(stepId);
     return el && !el.classList.contains('hidden');
   }
 
-  document.addEventListener('keydown', (e) => {
-    if(e.key !== 'Delete') return;
-
-    const tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
-    if(tag === 'textarea' || tag === 'input') return;
-
-    if(isStepVisible('step-decorate-sticker') && state.selectedType === 'sticker' && state.selectedItem){
-      e.preventDefault();
-      const id = state.selectedItem.id;
-      const idx = state.stickers.findIndex(s => s.id === id);
-      if(idx > -1){
-        state.stickers.splice(idx, 1);
-        state.selectedItem = null;
-        state.selectedType = null;
-        renderStickers();
-      }
-      return;
-    }
-
-    if(isStepVisible('step-decorate-text') && state.selectedType === 'text' && state.selectedItem){
-      e.preventDefault();
-      const id = state.selectedItem.id;
-      const idx = state.texts.findIndex(t => t.id === id);
-      if(idx > -1){
-        state.texts.splice(idx, 1);
-        state.selectedItem = null;
-        state.selectedType = null;
-        renderTexts();
-      }
-    }
-  });
-
-  function initAudioUI(){
-    syncSoundToggleUI();
-  }
-
-  // ---------- Init ----------
-  document.addEventListener('DOMContentLoaded', () => {
+  // =========================================================
+  // ✅ Init
+  // =========================================================
+  document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
-    initAudioUI();
+    await setCameraFacing('user', false);
+    syncSoundToggleUI();
     showStep('step-start');
+
+    // ✅ Del 키로 삭제(스티커/문구)
+    window.addEventListener('keydown', onGlobalKeyDown);
   });
 </script>
 </body>
